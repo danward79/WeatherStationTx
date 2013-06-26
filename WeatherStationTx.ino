@@ -8,21 +8,13 @@
 // The circuit:
 */
 /*
-// ATMEL ATTINY84 / ARDUINO
-		3	nSEL
-		5	nIRQ
-		7	SDO
-		8	SDI
-		9	SCK
-//                           +-\/-+
-//                     VCC  1|    |14  GND
-//             (D  0)  PB0  2|    |13  AREF (D 10)
-//             (D  1)  PB1  3|    |12  PA1  (D  9) 
-//                     PB3  4|    |11  PA2  (D  8) 
-//  PWM  INT0  (D  2)  PB2  5|    |10  PA3  (D  7) 
-//  PWM        (D  3)  PA7  6|    |9   PA4  (D  6) 
-//  PWM        (D  4)  PA6  7|    |8   PA5  (D  5)        PWM
-//                           +----+
+25/06/13 - Reworked for ATMega328 Jeenode V6
+
+Port Connections
+LDR 
+LDR
+DHT22 Data
+
 	ATTiny 84
 1  VCC
 2  PB0(PCINT8/XTAL1/CLKI)			D0	- 
@@ -40,7 +32,7 @@
 14 GND
 */
 
-#define DEBUG 0
+#define DEBUG 1
 
 //includes
 #include <JeeLib.h>
@@ -54,8 +46,8 @@
 #define LDR_PORT 0   				// Defined if LDR is connected to a port's AIO pin
 #define SMOOTH 2   					// LDR smoothing factor used for running averages
 #define DHT22_PORT 3 				// DHT22 Port
-#define FREQ RF12_433MHZ        	// Frequency of RF12B module can be RF12_433MHZ, RF12_868MHZ or RF12_915MHZ. You should use the one matching the module you have.
-#define NODEID 4           		
+#define FREQ RF12_868MHZ        	// Frequency of RF12B module can be RF12_433MHZ, RF12_868MHZ or RF12_915MHZ. You should use the one matching the module you have.
+#define NODEID 30           		
 #define GROUP 212  
 
 SoftwareSerial mySerial(7, 8); // RX, TX
@@ -85,8 +77,8 @@ ISR(WDT_vect) { Sleepy::watchdogEvent(); }
 void setup()
 {   
 #if DEBUG
-	mySerial.begin(9600);
-	mySerial.println("\n[WXTX]");
+	Serial.begin(9600);
+	Serial.println("\n[WXTX]");
 #endif
 	
 	rf12_initialize(NODEID, FREQ, GROUP);                    
@@ -144,18 +136,18 @@ void send_rf_data()
 void printData()
 {
 #if DEBUG
-	mySerial.print(" l: ");
-	mySerial.print(payload.light, DEC);
-	mySerial.print(" h ");
-	mySerial.print(payload.humidity);
-	mySerial.print(" t ");
-	mySerial.print(payload.temperature);
-	mySerial.print(" d ");
-	mySerial.print(payload.dewpoint);
-	mySerial.print(" c ");
-	mySerial.print(payload.cloudbase);
-	mySerial.print(" v: ");
-	mySerial.println(payload.vcc, DEC);
+	Serial.print(" l: ");
+	Serial.print(payload.light, DEC);
+	Serial.print(" h ");
+	Serial.print(payload.humidity);
+	Serial.print(" t ");
+	Serial.print(payload.temperature);
+	Serial.print(" d ");
+	Serial.print(payload.dewpoint);
+	Serial.print(" c ");
+	Serial.print(payload.cloudbase);
+	Serial.print(" v: ");
+	Serial.println(payload.vcc, DEC);
 #endif
 }
 
@@ -187,10 +179,10 @@ static int smoothedAverage(int prev, int next, byte firstTime =0) {
 static void doLDRMeasure() {
     byte firstTime = payload.humidity == 0; // special case to init running avg
 	
-	digitalWrite(9, HIGH);
+	digitalWrite(14+LDR_PORT, HIGH);
 	delay(10);
     int light = analogRead(0);
-	digitalWrite(9, LOW);
+	digitalWrite(14+LDR_PORT, LOW);
 
 	light = map(light, 150, 1023, 100, 0);
 	light = constrain(light, 0, 100);
