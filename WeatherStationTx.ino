@@ -54,8 +54,8 @@
 #define LDR_PORT 0   				// Defined if LDR is connected to a port's AIO pin
 #define SMOOTH 2   					// LDR smoothing factor used for running averages
 #define DHT22_PORT 3 				// DHT22 Port
-#define FREQ RF12_433MHZ        	// Frequency of RF12B module can be RF12_433MHZ, RF12_868MHZ or RF12_915MHZ. You should use the one matching the module you have.
-#define NODEID 4           		
+#define FREQ RF12_868MHZ        	// Frequency of RF12B module can be RF12_433MHZ, RF12_868MHZ or RF12_915MHZ. You should use the one matching the module you have.
+#define NODEID 18           		
 #define GROUP 212  
 
 SoftwareSerial mySerial(7, 8); // RX, TX
